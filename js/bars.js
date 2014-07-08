@@ -10,11 +10,19 @@ var chart = d3.select(".chart")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.csv('../gross.csv')
+chart.append("text")
+  .attr("id", "selection")
+  .attr("x", 400)
+  .attr("y", 10);
+
+
+var maxGross;
+
+d3.csv("../gross.csv")
   .row(function(d) { return {title: d.Title, year: d.Year, gross: +d.Gross}; })
   .get(function(error, data) { 
 
-	var maxGross = d3.max(data, function(d) { return d.gross; })
+	maxGross = d3.max(data, function(d) { return d.gross; })
 	scaleY.domain([0, maxGross]);
 
 	//Axis
@@ -26,24 +34,38 @@ d3.csv('../gross.csv')
 		.attr('class', 'axis')
 		.call(yAxis);
 
-	// Bars:
-		var bars = chart.selectAll('rect')
-			.data(data);
+    update(data);
 
-		bars
-			.enter()
-			.append('rect')
-			.attr('y', canvasH)
-			.attr('height', 0)
+});
 
-		bars
-			.transition()
-			.attr('x', function(d, i) { return i * (canvasW / data.length); })
-			.attr('width', function(d, i) { return canvasW / data.length - 2; })
-			.attr('y', function(d, i) { return scaleY(d.gross); })
-			.attr('height', function(d) { return scaleY(0) - scaleY(d.gross); })
-			.attr("fill", function(d) {
-			    return "rgb(0, 0, " + (d.gross / maxGross) * 255 + ")";
-			});
 
+function update(data){
+  // Bars:
+  var bars = chart.selectAll('rect')
+    .data(data);
+
+  bars
+    .enter()
+    .append('rect')
+    .attr('y', canvasH)
+    .attr('height', 0);
+
+  bars
+    .transition()
+    .attr('x', function(d, i) { return i * (canvasW / data.length); })
+    .attr('width', function(d, i) { return canvasW / data.length - 2; })
+    .attr('y', function(d, i) { return scaleY(d.gross); })
+    .attr('height', function(d) { return scaleY(0) - scaleY(d.gross); })
+    .attr("fill", function(d) {
+        return "rgb(0, 0, " + (d.gross / maxGross) * 255 + ")";
+    });
+
+  bars.on('mouseover', function(d){
+    d3.select("#selection").text(d.title + ": $" + d.gross);
   });
+
+  bars.on('mouseout', function(d){
+    d3.select("#selection").text('');
+  });
+
+}
