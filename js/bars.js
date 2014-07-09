@@ -1,6 +1,6 @@
 var margin = {top: 20, right: 30, bottom: 30, left: 100},
-    canvasW = 960 - margin.left - margin.right,
-    canvasH = 500 - margin.top - margin.bottom;
+    canvasW = 800 - margin.left - margin.right,
+    canvasH = 400 - margin.top - margin.bottom;
 
 var scaleY = d3.scale.linear().range([canvasH, 0]);
 
@@ -12,10 +12,10 @@ var chart = d3.select(".chart")
 
 chart.append("text")
   .attr("id", "selection")
-  .attr("x", 400)
+  .attr("x", 100)
   .attr("y", 10);
 
-
+var movies;
 var maxGross;
 
 d3.csv("../gross.csv")
@@ -34,12 +34,17 @@ d3.csv("../gross.csv")
 		.attr('class', 'axis')
 		.call(yAxis);
 
-    update(data);
-
+  movies = data;
+  update("2006");
 });
 
 
-function update(data){
+function update(year){
+
+  var data = movies.filter(function(movie){
+    return movie.year === year;
+  })
+
   // Bars:
   var bars = chart.selectAll('rect')
     .data(data);
@@ -60,6 +65,13 @@ function update(data){
         return "rgb(0, 0, " + (d.gross / maxGross) * 255 + ")";
     });
 
+  bars
+    .exit()
+    .transition()
+    .attr('y', canvasH)
+    .attr('height', 0)
+    .remove();
+
   bars.on('mouseover', function(d){
     d3.select("#selection").text(d.title + ": $" + d.gross);
   });
@@ -69,3 +81,7 @@ function update(data){
   });
 
 }
+
+document.getElementById('year').addEventListener('change', function(e){
+  update(this.value);
+});
