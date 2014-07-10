@@ -18,7 +18,7 @@ chart.append("text")
 var movies;
 var maxGross;
 
-d3.csv("../gross.csv")
+d3.csv("https://s3.amazonaws.com/movies_csv/gross.csv")
   .row(function(d) { return {title: d.Title, year: d.Year, gross: +d.Gross}; })
   .get(function(error, data) { 
 
